@@ -4,7 +4,8 @@ using namespace std;
 
 int main(int argc,char** argv){
     int rank,size,i=0;
-    vector<int> A = {1,2,3,4,5,6}, B = {7,8,9,10,11};
+    // vector<int> A = {1,2,3,4,5}, B = {7,8,9,10,11};
+    int A[5] = {1,2,3,4,5}, B[5] = {7,8,9,10,11};
 
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
