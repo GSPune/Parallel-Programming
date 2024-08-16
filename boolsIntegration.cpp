@@ -12,7 +12,7 @@ double f(double x){
 double fivep_integration(int x_k,double h,double A[]){
 	return ((2*h)/(45))*(double)(7*f(A[4*x_k]) + 32*f(A[4*x_k+1]) + 12*f(A[4*x_k+2]) + 32*f(A[4*x_k+3]) + 7*f(A[4*x_k+4]));
 }
-//(k-1) is divisible by no of processors
+//(k) is assumed to be divisible by no of processors i.e. size here!
 
 double integral = 0;
 
@@ -48,11 +48,12 @@ int main(int argc,char** argv)
 				sum += fivep_integration(k,h,A);
 				//cout << fivep_integration(k,h,A) << endl;
 			}
-			cout << sum << endl;
+			cout << "rank and sum are " << *rank <<","<< sum << endl;
 			
 		}
 	}
 	if (*rank == 0){
+		integral += sum;
 		double temp;
 		for(int i = 1; i < size; ++i){
 			MPI_Recv(&temp,1,MPI_DOUBLE,i,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
