@@ -20,7 +20,7 @@ int main(int argc,char** argv)
 { 
 	int *rank = new int,size;
 	int a = 0,b = 1;
-	int n = 100, k = n/4;
+	int n = 120, k = n/4;
 	double h = (b-a)/(double)n;
 	double sum = 0;
 	//if (*rank == 0) cout << "h::" << (2*h)/45 << endl;
@@ -36,18 +36,19 @@ int main(int argc,char** argv)
 	}
 
 	int iters = k/size;
+	//if (*rank == 0) cout << "iters is " << iters << endl;
 	//for loop to distribute to each processor
 	for (int i = 0; i < size; ++i){
 		if(*rank == i){
 			int st = (*rank) * iters;
 			sum = 0;
 			//loop to actually do the work!
-			for(int k = st; k < st + 5; k++){
+			for(int k = st; k < st + iters; k++){
 				
 				sum += fivep_integration(k,h,A);
 				//cout << fivep_integration(k,h,A) << endl;
 			}
-			//cout << sum << endl;
+			cout << sum << endl;
 			
 		}
 	}
