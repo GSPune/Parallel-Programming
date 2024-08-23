@@ -48,7 +48,7 @@ int main(int argc,char** argv)
 				sum += fivep_integration(k,h,A);
 				//cout << fivep_integration(k,h,A) << endl;
 			}
-			cout << "rank and sum are " << *rank <<","<< sum << endl;
+			// cout << "rank and sum are " << *rank <<","<< sum << endl;
 			
 		}
 	}
