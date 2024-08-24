@@ -7,22 +7,23 @@ using namespace std;
 int main(int argc,char** argv)
 { 
 	int rank,size;
-	int rows,y;
+	int rows;
 	int A[4][4] = {{1,5,0,4},{2,6,5,0},{0,7,3,2},{4,0,1,1}};
+	int x[4] = {1,2,4,6};
 	//considering square matrices ...row major?
 	//vector<vector<int>> A{{1,5,0,4,5},{2,6,5,0},{0,7,3,2},{4,0,1,1}};
 	rows = 4;//A.size();
-	int x[4] = {1,2,4,6};
+	
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	//cout << "\n" ;
-	//if(rank == 0) cout << A.size() << endl;
-	int sendCountRows = rows/size;
-	int *recvbuf = new int[sendCountRows*rows];
+
+	int sendCountRows = (rows/size)*rows;
+	int *recvbuf = new int[sendCountRows];
 	//send (rows/size) rows OF A to each process 
-	MPI_Scatter(&A,sendCountRows*rows,MPI_INT,recvbuf,sendCountRows*rows,MPI_INT,0,MPI_COMM_WORLD);
-	
+	MPI_Scatter(&A,sendCountRows,MPI_INT,recvbuf,sendCountRows,MPI_INT,0,MPI_COMM_WORLD);
+	//recvcount == sendcount
+
 	int sCnt = (rows/size);
 	int *rcv = new int[sCnt];
 	//send sCnt elements of x to each process
@@ -31,6 +32,7 @@ int main(int argc,char** argv)
 	//int gCnt = (size)*sCnt;
 	int *xGathered = new int[rows];
 	MPI_Allgather(rcv,sCnt,MPI_INT,xGathered,sCnt,MPI_INT,MPI_COMM_WORLD);
+	int y[sCnt];
 	for (int i = 0; i < size; ++i){
 		if(rank == i){
 			y = 0;
@@ -41,11 +43,10 @@ int main(int argc,char** argv)
 			//cout << endl;
 			//cout << "All Elements gathered on proc " << rank << endl;
 			//for(int i = 0; i < rows; ++i) cout << xGathered[i] << ", ";
-			for(int i = 0; i < rows ; ++i){ 
-				y += recvbuf[i]*xGathered[i];
-				
+			for(int k = 0; k < rows ; ++k){ 
+				y[i] += recvbuf[k]*xGathered[k];
 			}
-			cout << y << endl;
+			cout << y[i] << endl;
 		}
 	}
 	int *bGathered = new int[size];
