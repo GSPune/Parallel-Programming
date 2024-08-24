@@ -35,7 +35,7 @@ int main(int argc,char** argv)
 	int y[sCnt];
 	for (int i = 0; i < size; ++i){
 		if(rank == i){
-			y = 0;
+			for(int j = 0; j < sCnt; ++j) y[j] = 0;
 			//cout << "All Elements received on proc " << rank << endl;
 			//for(int i = 0; i < sendCountRows*rows; ++i) cout << recvbuf[i] << ", ";
 			//cout << "and..";
@@ -43,19 +43,20 @@ int main(int argc,char** argv)
 			//cout << endl;
 			//cout << "All Elements gathered on proc " << rank << endl;
 			//for(int i = 0; i < rows; ++i) cout << xGathered[i] << ", ";
-			for(int k = 0; k < rows ; ++k){ 
-				y[i] += recvbuf[k]*xGathered[k];
+			for(int k = 0; k < sendCountRows ; ++k){ 
+				y[(k/rows)] += recvbuf[k]*xGathered[k%rows];
 			}
-			cout << y[i] << endl;
+			// cout << y[0] << endl;
+			// cout << y[1] << endl;
 		}
 	}
-	int *bGathered = new int[size];
+	int *bGathered = new int[rows];
 	//MPI_Gather collects data from all processes in a given communicator and concatenates them in the given buffer on the specified process. 
 	//The concatenation order follows that of the ranks.
-	MPI_Gather(&y,1,MPI_INT,bGathered,1,MPI_INT,0,MPI_COMM_WORLD);
+	MPI_Gather(&y,sCnt,MPI_INT,bGathered,sCnt,MPI_INT,0,MPI_COMM_WORLD);
 	if(rank == 0){
 		for(int i = 0; i < rows ; ++i){
-			//cout << "y" << i << " is " << bGathered[i] << endl;
+			cout << "y" << i << " is " << bGathered[i] << endl;
 		}
 	}
 	MPI_Finalize();
