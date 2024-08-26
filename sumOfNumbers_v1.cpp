@@ -4,6 +4,7 @@
 using namespace std;
 int total = 0;
 
+//Works on 4 processors only..
 int main(int argc,char** argv)
 {
 	int *rank = new int,size,i=0;
