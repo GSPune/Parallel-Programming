@@ -1,7 +1,5 @@
 #include<mpi.h>
-#include<iostream>
-#include<vector>
-#include <cmath>
+#include<bits/stdc++.h>
 using namespace std;
 
 
@@ -46,10 +44,7 @@ int main(int argc,char** argv)
 			for(int k = st; k < st + iters; k++){
 				
 				sum += fivep_integration(k,h,A);
-				//cout << fivep_integration(k,h,A) << endl;
-			}
-			// cout << "rank and sum are " << *rank <<","<< sum << endl;
-			
+			}			
 		}
 	}
 	if (*rank == 0){
@@ -67,8 +62,11 @@ int main(int argc,char** argv)
             }
             integral += sum;
         }
-
-		cout << "Final Approximate Integration Value :- " << integral << endl;
+        ofstream fout;
+        fout.open("./boolsOutput.txt");
+		fout << "Final Approximate Integration Value :- " << integral << endl; 
+        fout.close();
+        cout << "Program Results passed onto to output file!" << endl;
 	}
 	
 	else{
