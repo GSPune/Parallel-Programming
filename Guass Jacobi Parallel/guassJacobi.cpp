@@ -1,11 +1,16 @@
 #include<mpi.h>
+#include<fstream>
 #include <bits/stdc++.h>
 using namespace std;
 #include <cmath>
 //Distributed System
-int n = 4;
+
 int main(int argc,char** argv)
-{ 
+{ 	
+	std::ifstream fin;
+	fin.open("./input.txt");
+	int n; fin >> n;
+	// fin.close();
 	int rank,p;
 	int A[n][n],b[n];
 	double x[n];
@@ -15,10 +20,8 @@ int main(int argc,char** argv)
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
 	if (rank == 0){
-		ifstream fin;
-		fin.open("./input.txt");
-		//fin >> n;
-		// int A[n][n] = {{1,5,0,4},{2,6,5,0},{0,7,3,2},{4,0,1,1}};
+		// ifstream fin;
+		// fin.open("./input.txt");
 		
 		for(int i = 0 ; i < n ; ++i){
 			for (int j = 0 ; j < n; ++j){
@@ -29,7 +32,7 @@ int main(int argc,char** argv)
 		for (int k = 0; k < n; ++k){
 			fin >> b[k];x[k] = 0;
 		}
-		fin.close();
+		
 		
 		for(int i = 0 ; i < n ; ++i){
 			for (int j = 0 ; j < n; ++j){
@@ -40,6 +43,7 @@ int main(int argc,char** argv)
 		cout << "Program Results passed onto to output file!" << endl;
 		
 	}
+	fin.close();
 	
     int rem = n % p, k = n/p;
     int sendCountRows = k*n;
@@ -62,7 +66,7 @@ int main(int argc,char** argv)
  	for (int it = 0; it < 2; it++){
  		double xn[k];
  		for(int i = 0; i < k ; ++i){
- 			cout << recv[i] << endl;
+ 			// cout << recv[i] << endl;
  			xn[i] = recv[i];
  			for (int j = 0; j < n; ++j){
  				if((i*n+rank*k+i) != j){
@@ -84,10 +88,10 @@ int main(int argc,char** argv)
  			x[p] = xNGathered[p];
  		}
  		
- 		if(rank == 1){
-		for(int i = 0; i < n; ++i){
-	 		//cout << x[i] << endl;
-	 	}}
+ 		// if(rank == 1){
+		// for(int i = 0; i < n; ++i){
+	 	// 	//cout << x[i] << endl;
+	 	// }}
  	}
  	
 	if(rank == 0){
