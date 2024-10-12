@@ -54,10 +54,23 @@ int main(int argc,char** argv){
 		//copy the pivot row for next iteration
 		if (rank == k && rank != n-1) memcpy(&temp,&B,sizeof(B));
 	}
-	MPI_Gather(&B,5,MPI_DOUBLE,&reducedA[rank],5,MPI_DOUBLE,0,MPI_COMM_WORLD);
+ 	MPI_Gather(&B,5,MPI_DOUBLE,&reducedA[rank],5,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	if (rank==0){
 		printMatrix(reducedA,4);
 		//Backsubstitution *
+		double ans[n];
+		for (int i = n-1; i >= 0; --i){
+			double tmp = reducedA[i][n];
+			for(int j = i+1; j < n; ++j){
+				tmp -= reducedA[i][j]*ans[j];
+			}
+			ans[i] = tmp/reducedA[i][i];
+		}
+
+		for (int i = 0; i < n; ++i){
+			cout << "x"<<i+1 << ": " << ans[i] << endl;  
+		}
+		cout << endl;
 	}
 	MPI_Finalize();
 	return 0;
