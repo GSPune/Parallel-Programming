@@ -2,7 +2,7 @@
 #include <mpi.h>
 using namespace std;
 
-void display(vector<int>& A,int size){
+void display(vector<int>& A){
 	for(auto e:A){
 		cout << e << " ";
 	}
@@ -37,15 +37,27 @@ void quickSort(vector<int>& A,int s,int e){
 
 int main(int argc,char** argv){
 	int rank,p;
+	// int A[n] = {7,12,5,6,2,8};
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&p);
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	int n = 6;
-	// int A[n] = {7,12,5,6,2,8};
-	vector<int> A = {7,12,5,6,2,8};
-	display(A,6);
-	quickSort(A,0,n);
-	display(A,n);
+	int n;
+	vector<int> A;
+	if (rank == 0){
+		ifstream fin;
+		fin.open("input.txt");
+		fin >> n;
+		for (int i = 0; i < n; ++i){
+			int t;
+			fin >> t;
+			A.emplace_back(t);
+		}
+		display(A);
+		fin.close();
+	}
+	
+	// quickSort(A,0,n);
+	// display(A,n);
 	MPI_Finalize();
 	return 0;
 }
