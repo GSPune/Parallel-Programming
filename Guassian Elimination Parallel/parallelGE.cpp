@@ -2,10 +2,10 @@
 #include<mpi.h>
 using namespace std;
 
-void printMatrix(double A[][5], int n){
+void printMatrix(const double* A, int n){
 	for(int i = 0; i < n; ++i){
 		for(int j = 0; j < n + 1; ++j){
-			cout << A[i][j] << "    ";
+			cout << A[i*(n+1)+j] << "    ";
 		}
 		cout << endl;
 	}
@@ -27,26 +27,45 @@ int main(int argc,char** argv){
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&p); // p is the total number of processors used
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	int n = 4;
-	double A[4][5];
-	double B[5],temp[5]; // for each processor
-	double reducedA[4][5];
+    int n;
+	ifstream fin;
+    fin.open("./input.txt");
+    fin >> n;
+	double A[n][n+1];
+	double reducedA[n][n+1];
 	if (rank == 0){
-		double copyOfA[4][5] = {{2,3,-1,1,8},{3,2,1,-2,3},{1,1,-2,3,1},{4,0,-1,3,7}};
-		memcpy(&A,&copyOfA,sizeof(A));
-		//printMatrix(A,4);
+         for (int i = 0; i < n; ++i){
+            for(int j = 0; j < n+1 ; ++j){
+                fin >> A[i][j];
+            }
+        }
+        int m = n+1;
+        double flatA[n*m];
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                flatA[i * m + j] = A[i][j];
+            }
+        }
+		printMatrix(flatA,n);
+
+        if (p != 4){
+			cout << "Error: Number of processors should be 4." << endl;
+			MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
+		}
 	}
-	MPI_Scatter(&A,5,MPI_DOUBLE,&B,5,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    int rows = n/p;
+    double B[(n+1)*rows],temp[(n+1)*rows]; // for each processor
+	MPI_Scatter(&A,(n+1)*rows,MPI_DOUBLE,&B,(n+1)*rows,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	//A will receive the first row in B i.e R0
 	if (rank == 0) memcpy(&temp,&B,sizeof(B));
 	
 	// Perform required number of operations
-	for (int k = 1; k < 4; k ++){
+	for (int k = 1; k < n; k ++){
 		
 		//Send necesary Row to all other processes
-		MPI_Bcast(&temp, 5, MPI_DOUBLE, k-1, MPI_COMM_WORLD);
+		MPI_Bcast(&temp,(n+1)*rows, MPI_DOUBLE, k-1, MPI_COMM_WORLD);
 		if (rank > k-1){
-			Op(B,temp,5,k-1);
+			Op(B,temp,(n+1),k-1); //DRY run
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
 		
@@ -54,9 +73,10 @@ int main(int argc,char** argv){
 		//copy the pivot row for next iteration
 		if (rank == k && rank != n-1) memcpy(&temp,&B,sizeof(B));
 	}
- 	MPI_Gather(&B,5,MPI_DOUBLE,&reducedA[rank],5,MPI_DOUBLE,0,MPI_COMM_WORLD);
+ 	MPI_Gather(&B,(n+1)*rows,MPI_DOUBLE,&reducedA[rank],(n+1)*rows,MPI_DOUBLE,0,MPI_COMM_WORLD);
+
 	if (rank==0){
-		printMatrix(reducedA,4);
+		// printMatrix(reducedA,4);
 		//Backsubstitution *
 		double ans[n];
 		for (int i = n-1; i >= 0; --i){
@@ -67,11 +87,16 @@ int main(int argc,char** argv){
 			ans[i] = tmp/reducedA[i][i];
 		}
 
+		ofstream fout;
+        fout.open("./output.txt");
 		for (int i = 0; i < n; ++i){
-			cout << "x"<<i+1 << ": " << ans[i] << endl;  
+			fout << "\nx"<<i+1 << ": " << ans[i] << endl;  
 		}
-		cout << endl;
+		cout << "Solution passed to the output file!" << endl;
+		fout << endl;
+		fout.close();
 	}
+
 	MPI_Finalize();
 	return 0;
 }
