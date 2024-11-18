@@ -12,16 +12,18 @@ int main(int argc,char** argv){
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
     if(rank % 2 == 0){
+        cout << rank <<": " << "sends array A to proc: " << (rank+1)%size << endl; 
         MPI_Send(&A,5,MPI_INT,(rank+1)%size,1,MPI_COMM_WORLD);
         MPI_Recv(&B,5,MPI_INT,(rank-1+size)%size,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
     }
     else{
+        cout << rank <<": " << "receives array A from proc: " << (rank-1+size)%size << endl; 
         MPI_Recv(&B,5,MPI_INT,(rank-1+size)%size,1,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         MPI_Send(&A,5,MPI_INT,(rank+1)%size,1,MPI_COMM_WORLD);
     }
-    cout << "Process Rank " << rank << endl;
-    for(auto e:B) cout << e << " ";
-    cout << endl;
+    // cout << "Process Rank " << rank << endl;
+    // for(auto e:B) cout << e << " ";
+    // cout << endl;
     MPI_Finalize();
 	return 0;
 }
